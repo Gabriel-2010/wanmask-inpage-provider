@@ -9,11 +9,11 @@ const ObjectMultiplex = require('obj-multiplex')
 const util = require('util')
 const SafeEventEmitter = require('safe-event-emitter')
 
-module.exports = MetamaskInpageProvider
+module.exports = WanmaskInpageProvider
 
-util.inherits(MetamaskInpageProvider, SafeEventEmitter)
+util.inherits(WanmaskInpageProvider, SafeEventEmitter)
 
-function MetamaskInpageProvider (connectionStream) {
+function WanmaskInpageProvider (connectionStream) {
   const self = this
 
   // super constructor
@@ -29,24 +29,24 @@ function MetamaskInpageProvider (connectionStream) {
   )
 
   // subscribe to metamask public config (one-way)
-  self.publicConfigStore = new LocalStorageStore({ storageKey: 'MetaMask-Config' })
+  self.publicConfigStore = new LocalStorageStore({ storageKey: 'WanMask-Config' })
 
   pump(
-    mux.createStream('publicConfig'),
+    mux.createStream('publicConfig2'),
     asStream(self.publicConfigStore),
-    logStreamDisconnectWarning.bind(this, 'MetaMask PublicConfigStore')
+    logStreamDisconnectWarning.bind(this, 'WanMask PublicConfigStore')
   )
 
   // ignore phishing warning message (handled elsewhere)
-  mux.ignoreStream('phishing')
+  mux.ignoreStream('phishing2')
 
   // connect to async provider
   const jsonRpcConnection = createJsonRpcStream()
   pump(
     jsonRpcConnection.stream,
-    mux.createStream('provider'),
+    mux.createStream('provider2'),
     jsonRpcConnection.stream,
-    logStreamDisconnectWarning.bind(this, 'MetaMask RpcProvider')
+    logStreamDisconnectWarning.bind(this, 'WanMask RpcProvider')
   )
 
   // handle sendAsync requests via dapp-side rpc engine
@@ -68,7 +68,7 @@ function MetamaskInpageProvider (connectionStream) {
 }
 
 // Web3 1.0 provider uses `send` with a callback for async queries
-MetamaskInpageProvider.prototype.send = function (payload, callback) {
+WanmaskInpageProvider.prototype.send = function (payload, callback) {
   const self = this
 
   if (callback) {
@@ -80,17 +80,17 @@ MetamaskInpageProvider.prototype.send = function (payload, callback) {
 
 // handle sendAsync requests via asyncProvider
 // also remap ids inbound and outbound
-MetamaskInpageProvider.prototype.sendAsync = function (payload, cb) {
+WanmaskInpageProvider.prototype.sendAsync = function (payload, cb) {
   const self = this
 
   if (payload.method === 'eth_signTypedData') {
-    console.warn('MetaMask: This experimental version of eth_signTypedData will be deprecated in the next release in favor of the standard as defined in EIP-712. See https://git.io/fNzPl for more information on the new standard.')
+    console.warn('WanMask: This experimental version of eth_signTypedData will be deprecated in the next release in favor of the standard as defined in EIP-712. See https://git.io/fNzPl for more information on the new standard.')
   }
 
   self.rpcEngine.handle(payload, cb)
 }
 
-MetamaskInpageProvider.prototype._sendSync = function (payload) {
+WanmaskInpageProvider.prototype._sendSync = function (payload) {
   const self = this
 
   let selectedAddress
@@ -122,7 +122,7 @@ MetamaskInpageProvider.prototype._sendSync = function (payload) {
     // throw not-supported Error
     default:
       var link = 'https://github.com/MetaMask/faq/blob/master/DEVELOPERS.md#dizzy-all-async---think-of-metamask-as-a-light-client'
-      var message = `The MetaMask Web3 object does not support synchronous methods like ${payload.method} without a callback parameter. See ${link} for details.`
+      var message = `The WanMask Web3 object does not support synchronous methods like ${payload.method} without a callback parameter. See ${link} for details.`
       throw new Error(message)
 
   }
@@ -135,16 +135,16 @@ MetamaskInpageProvider.prototype._sendSync = function (payload) {
   }
 }
 
-MetamaskInpageProvider.prototype.isConnected = function () {
+WanmaskInpageProvider.prototype.isConnected = function () {
   return true
 }
 
-MetamaskInpageProvider.prototype.isMetaMask = true
+WanmaskInpageProvider.prototype.isWanMask = true
 
 // util
 
 function logStreamDisconnectWarning (remoteLabel, err) {
-  let warningMsg = `MetamaskInpageProvider - lost connection to ${remoteLabel}`
+  let warningMsg = `WanmaskInpageProvider - lost connection to ${remoteLabel}`
   if (err) warningMsg += '\n' + err.stack
   console.warn(warningMsg)
   const listeners = this.listenerCount('error')

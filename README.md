@@ -1,20 +1,20 @@
-# MetaMask Inpage Provider
+# WanMask Inpage Provider
 
-Used to initialize the inpage ethereum provider injected by MetaMask.
+Used to initialize the inpage ethereum provider injected by WanMask.
 
 ## Installation
 
-`npm install metamask-inpage-provider -S`
+`npm install wanmask-inpage-provider -S`
 
 ## Usage
 
 ```javascript
 // Create a stream to a remote provider:
-var metamaskStream = new LocalMessageDuplexStream({
+var wanmaskStream = new LocalMessageDuplexStream({
   name: 'inpage',
   target: 'contentscript',
 })
 
 // compose the inpage provider
-var inpageProvider = new MetamaskInpageProvider(metamaskStream)
+var inpageProvider = new WanmaskInpageProvider(wanmaskStream)
 ```
